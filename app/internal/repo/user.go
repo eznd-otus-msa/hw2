@@ -3,29 +3,34 @@ package repo
 import "github.com/eznd-otus-msa/hw2/app/internal/domain"
 
 type UserReader interface {
-    Get(int64) (*domain.User, error)
+	Get(domain.UserId) (*domain.User, error)
+}
+
+type UserObserver interface {
+	Exists(domain.UserId) (bool, error)
 }
 
 type UserCreator interface {
-    Create(*domain.User) error
+	Create(*domain.User) (*domain.User, error)
 }
 
 type UserUpdater interface {
-    Update(int64, *domain.User) error
+	Update(domain.UserId, *domain.User) (*domain.User, error)
 }
 
 type UserPartialUpdater interface {
-    PartialUpdate(int64, domain.UserPartialData) error
+	PartialUpdate(domain.UserId, domain.UserPartialData) (*domain.User, error)
 }
 
 type UserDeleter interface {
-    Delete(domain.UserId) error
+	Delete(domain.UserId) error
 }
 
 type UserRepo interface {
-    UserReader
-    UserCreator
-    UserUpdater
-    UserPartialUpdater
-    UserDeleter
+	UserReader
+	UserObserver
+	UserCreator
+	UserUpdater
+	UserPartialUpdater
+	UserDeleter
 }

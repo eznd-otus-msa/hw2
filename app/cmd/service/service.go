@@ -27,7 +27,8 @@ func main() {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: dbrepo.Dsn(cfg.Db),
 	}), &gorm.Config{
-		Logger: dblogger.Default.LogMode(dblogger.Silent),
+		Logger: dblogger.Default.LogMode(dblogger.Info),
+		//Logger: dblogger.Default.LogMode(dblogger.Silent),
 	})
 	if err != nil {
 		panic(err)
@@ -37,17 +38,25 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	getUserHandler := http.NewGetUser(userService)
 	postUserHandler := http.NewPostUser(userService)
+	putUserHandler := http.NewPutUser(userService)
+	patchUserHandler := http.NewPatchUser(userService)
 
 	srv := fiber.New(fiber.Config{})
 	srv.Use(logger.New())
 
 	api := srv.Group("/api")
 
+	api.Post("/user", postUserHandler.Handle())
+	api.Post("/users", postUserHandler.Handle())
+
 	api.Get("/user/:id", getUserHandler.Handle())
 	api.Get("/users/:id", getUserHandler.Handle())
 
-	api.Post("/user", postUserHandler.Handle())
-	api.Post("/users", postUserHandler.Handle())
+	api.Put("/user/:id", putUserHandler.Handle())
+	api.Put("/users/:id", putUserHandler.Handle())
+
+	api.Patch("/user/:id", patchUserHandler.Handle())
+	api.Patch("/users/:id", patchUserHandler.Handle())
 
 	srv.All("/*", http.DefaultResponse)
 

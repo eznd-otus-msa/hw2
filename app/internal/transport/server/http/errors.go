@@ -2,11 +2,16 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"github.com/eznd-otus-msa/hw2/app/internal/domain"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
+
+type Error interface {
+	HttpCode() int
+}
 
 type errBadRequest struct {
 	error
@@ -19,13 +24,33 @@ func (e *errBadRequest) Error() string {
 	return "bad request"
 }
 
+type errMethodNotAllowed struct {
+	error
+}
+
+func (e errMethodNotAllowed) HttpCode() int {
+	return fiber.StatusMethodNotAllowed
+}
+func (e errMethodNotAllowed) Error() string {
+	return "method not allowed"
+}
+
 var (
 	ErrBadRequest       = errBadRequest{}
-	ErrMethodNotAllowed = errors.New("method not allowed")
+	ErrMethodNotAllowed = errMethodNotAllowed{}
 )
 
 func json(c *fiber.Ctx, data interface{}) error {
 	return c.Status(http.StatusOK).JSON(data)
+}
+
+func created(c *fiber.Ctx, data interface{}, entityId int64) error {
+	origPath := c.OriginalURL()
+	if origPath[:len(origPath)-1] != "/" {
+		origPath += "/"
+	}
+	c.Set(fiber.HeaderLocation, fmt.Sprintf("%s%d", origPath, entityId))
+	return c.Status(http.StatusCreated).JSON(data)
 }
 
 func fail(c *fiber.Ctx, err error) error {
@@ -37,8 +62,12 @@ func fail(c *fiber.Ctx, err error) error {
 }
 
 func codeByErr(err error) int {
-	if errors.Is(err, ErrMethodNotAllowed) {
-		return fiber.StatusMethodNotAllowed
+	if _, ok := err.(Error); ok {
+		return err.(Error).HttpCode()
+	}
+
+	if _, ok := err.(validation.Errors); ok {
+		return fiber.StatusBadRequest
 	}
 
 	if errors.Is(err, domain.ErrInvalidUserId) {
@@ -48,13 +77,6 @@ func codeByErr(err error) int {
 		return fiber.StatusNotFound
 	}
 
-	if _, ok := err.(domain.HttpError); ok {
-		return err.(domain.HttpError).HttpCode()
-	}
-
-	if _, ok := err.(validation.Errors); ok {
-		return fiber.StatusBadRequest
-	}
 	return fiber.StatusInternalServerError
 }
 

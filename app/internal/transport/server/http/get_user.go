@@ -27,6 +27,6 @@ func (h *getUserHandler) Handle() fiber.Handler {
 		if err != nil {
 			return fail(ctx, err)
 		}
-		return json(ctx, u)
+		return json(ctx, (&service.User{}).FromDomain(u))
 	}
 }

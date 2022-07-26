@@ -23,10 +23,10 @@ func (h *postUserHandler) Handle() fiber.Handler {
 			return fail(ctx, err)
 		}
 
-		err = h.creator.Create(&u)
+		user, err := h.creator.Create(&u)
 		if err != nil {
 			return fail(ctx, err)
 		}
-		return json(ctx, u)
+		return created(ctx, (&service.User{}).FromDomain(user), int64(user.Id))
 	}
 }

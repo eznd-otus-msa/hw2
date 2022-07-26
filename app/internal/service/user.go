@@ -16,6 +16,22 @@ type UserData struct {
 	Phone     string `json:"phone"`
 }
 
+type User struct {
+	Id int64 `json:"id"`
+	UserData
+}
+
+func (u *User) FromDomain(d *domain.User) *User {
+	u.Id = int64(d.Id)
+	u.Username = d.Username
+	u.FirstName = d.FirstName
+	u.LastName = d.LastName
+	u.Email = d.Email
+	u.Phone = d.Phone
+
+	return u
+}
+
 type UserCreate UserData
 
 func (u UserCreate) Validate() error {
@@ -41,6 +57,17 @@ func (u UserCreate) ToDomain() *domain.User {
 
 type UserUpdate UserData
 
+func (u UserUpdate) ToDomain() *domain.User {
+	return &domain.User{
+		Id:        0,
+		Username:  u.Username,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Email:     u.Email,
+		Phone:     u.Phone,
+	}
+}
+
 type UserPartialUpdate struct {
 	Username  nullable.String `json:"username"`
 	FirstName nullable.String `json:"firstName"`
@@ -49,20 +76,41 @@ type UserPartialUpdate struct {
 	Phone     nullable.String `json:"phone"`
 }
 
+func (pu UserPartialUpdate) ToDomain() (d domain.UserPartialData) {
+
+	if pu.Username.Set {
+		d["username"] = pu.Username.Value
+	}
+	if pu.FirstName.Set {
+		d["firstName"] = pu.FirstName.Value
+	}
+	if pu.LastName.Set {
+		d["lastName"] = pu.LastName.Value
+	}
+	if pu.Email.Set {
+		d["email"] = pu.Email.Value
+	}
+	if pu.Phone.Set {
+		d["phone"] = pu.Phone.Value
+	}
+
+	return
+}
+
 type UserReader interface {
 	Get(domain.UserId) (*domain.User, error)
 }
 
 type UserCreator interface {
-	Create(*UserCreate) error
+	Create(*UserCreate) (*domain.User, error)
 }
 
 type UserUpdater interface {
-	Update(domain.UserId, *domain.User) error
+	Update(domain.UserId, *UserUpdate) (*domain.User, error)
 }
 
 type UserPartialUpdater interface {
-	PartialUpdate(domain.UserId, domain.UserPartialData) error
+	PartialUpdate(domain.UserId, domain.UserPartialData) (*domain.User, error)
 }
 
 type UserDeleter interface {
@@ -79,6 +127,7 @@ type UserService interface {
 
 type userService struct {
 	reader         repo.UserReader
+	observer       repo.UserObserver
 	creator        repo.UserCreator
 	updater        repo.UserUpdater
 	partialUpdater repo.UserPartialUpdater
@@ -88,6 +137,7 @@ type userService struct {
 func NewUserService(repo repo.UserRepo) UserService {
 	return &userService{
 		reader:         repo,
+		observer:       repo,
 		creator:        repo,
 		updater:        repo,
 		partialUpdater: repo,
@@ -101,7 +151,7 @@ func (s *userService) Get(id domain.UserId) (*domain.User, error) {
 		return nil, err
 	}
 
-	user, err := s.reader.Get(int64(id))
+	user, err := s.reader.Get(id)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return nil, domain.ErrUserNotFound
@@ -110,21 +160,29 @@ func (s *userService) Get(id domain.UserId) (*domain.User, error) {
 	return user, err
 }
 
-func (s *userService) Create(user *UserCreate) error {
-	err := user.Validate()
+func (s *userService) Create(req *UserCreate) (*domain.User, error) {
+	err := req.Validate()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return s.creator.Create(user.ToDomain())
+	return s.creator.Create(req.ToDomain())
 }
 
-func (s *userService) Update(id domain.UserId, user *domain.User) error {
-	return s.updater.Update(int64(id), user)
+func (s *userService) Update(id domain.UserId, req *UserUpdate) (*domain.User, error) {
+	exists, err := s.observer.Exists(id)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, domain.ErrUserNotFound
+	}
+
+	return s.updater.Update(id, req.ToDomain())
 }
 
-func (s *userService) PartialUpdate(id domain.UserId, data domain.UserPartialData) error {
-	return s.partialUpdater.PartialUpdate(int64(id), data)
+func (s *userService) PartialUpdate(id domain.UserId, data domain.UserPartialData) (*domain.User, error) {
+	return s.partialUpdater.PartialUpdate(id, data)
 }
 
 func (s *userService) Delete(id domain.UserId) error {
