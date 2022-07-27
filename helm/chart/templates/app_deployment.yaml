@@ -41,7 +41,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: {{ .Values.image.migrateCommand }}
-          args: {{ .Values.image.migrateArgs }}
           envFrom:
             - configMapRef:
                 name: app-config

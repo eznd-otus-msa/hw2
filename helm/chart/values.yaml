@@ -3,11 +3,9 @@ replicaCount: 3
 image:
   repository: eznd/otus-msa-hw2
   pullPolicy: IfNotPresent
-  tag: v0.0.6
+  tag: v0.0.13
   command: ["/app/service"]
-#  migrateCommand: ["/app/migrate"]
-  migrateCommand: ["/wait-for-it.sh"]
-  migrateArgs: ["postgres-db-lb.otus-msa-hw2:5432", "-t", "600000000", "--", "/app/migrate"]
+  migrateCommand: ["/entrypoint-migrate.sh"]
 
 service:
   type: NodePort
@@ -22,4 +20,3 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: []

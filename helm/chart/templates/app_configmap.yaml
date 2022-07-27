@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
-  DB_HOST: "postgres-db-lb.otus-msa-hw2"
+  DB_HOST: "postgres-db-lb"
   APP_ENV: "prod"
   HTTP_PORT: "8000"

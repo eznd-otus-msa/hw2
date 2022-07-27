@@ -15,3 +15,6 @@ k8s-deploy:
 
 k8s-remove:
 	helm/remove.sh
+
+newman:
+	newman run postman/collection.json

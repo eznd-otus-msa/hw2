@@ -8,10 +8,10 @@ RUN cd cmd/migrate && go build -o migrate
 RUN cd cmd/service && go build -o service
 
 FROM alpine:3.16
-RUN apk add --no-cache bash
 WORKDIR /app
 COPY --from=builder /app/cmd/migrate/migrate .
 COPY --from=builder /app/cmd/service/service .
 COPY ./app/config/config.yaml /app
 COPY ./docker/files/entrypoint.sh /
+COPY ./docker/files/entrypoint-migrate.sh /
 COPY ./docker/files/wait-for-it.sh /
