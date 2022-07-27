@@ -39,8 +39,13 @@ func (r *userRepo) Update(id domain.UserId, user *domain.User) (*domain.User, er
 	return user, err
 }
 
-func (r *userRepo) PartialUpdate(id domain.UserId, data domain.UserPartialData) (u *domain.User, err error) {
-	err = r.db.Where(id).Updates(data).Error
+func (r *userRepo) PartialUpdate(id domain.UserId, data *domain.UserPartialData) (u *domain.User, err error) {
+	upd := make(map[string]interface{})
+	for k, v := range data.All() {
+		upd[k] = v
+	}
+
+	err = r.db.Model(&domain.User{}).Where(id).Updates(upd).Error
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +54,5 @@ func (r *userRepo) PartialUpdate(id domain.UserId, data domain.UserPartialData) 
 }
 
 func (r *userRepo) Delete(id domain.UserId) error {
-	//TODO implement me
-	panic("implement me")
+	return r.db.Delete(&domain.User{}, id).Error
 }

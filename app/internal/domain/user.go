@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/eznd-otus-msa/hw2/app/pkg/types"
+
 type UserId int64
 
 func (t UserId) Validate() error {
@@ -18,8 +20,4 @@ type User struct {
 	Phone     string
 }
 
-type UserPartialData = map[string]string
-
-func (pd UserPartialData) Init() UserPartialData {
-	return make(map[string]string)
-}
+type UserPartialData = types.Kv

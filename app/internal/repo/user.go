@@ -19,7 +19,7 @@ type UserUpdater interface {
 }
 
 type UserPartialUpdater interface {
-	PartialUpdate(domain.UserId, domain.UserPartialData) (*domain.User, error)
+	PartialUpdate(domain.UserId, *domain.UserPartialData) (*domain.User, error)
 }
 
 type UserDeleter interface {

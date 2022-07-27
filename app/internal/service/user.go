@@ -4,6 +4,7 @@ import (
 	"github.com/eznd-otus-msa/hw2/app/internal/domain"
 	"github.com/eznd-otus-msa/hw2/app/internal/repo"
 	"github.com/eznd-otus-msa/hw2/app/pkg/nullable"
+	"github.com/eznd-otus-msa/hw2/app/pkg/types"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 )
@@ -76,25 +77,25 @@ type UserPartialUpdate struct {
 	Phone     nullable.String `json:"phone"`
 }
 
-func (pu UserPartialUpdate) ToDomain() (d domain.UserPartialData) {
-
+func (pu UserPartialUpdate) ToDomain() *domain.UserPartialData {
+	d := types.NewKv()
 	if pu.Username.Set {
-		d["username"] = pu.Username.Value
+		d.Set("username", pu.Username.Value)
 	}
 	if pu.FirstName.Set {
-		d["firstName"] = pu.FirstName.Value
+		d.Set("firstName", pu.FirstName.Value)
 	}
 	if pu.LastName.Set {
-		d["lastName"] = pu.LastName.Value
+		d.Set("lastName", pu.LastName.Value)
 	}
 	if pu.Email.Set {
-		d["email"] = pu.Email.Value
+		d.Set("email", pu.Email.Value)
 	}
 	if pu.Phone.Set {
-		d["phone"] = pu.Phone.Value
+		d.Set("phone", pu.Phone.Value)
 	}
 
-	return
+	return d
 }
 
 type UserReader interface {
@@ -110,7 +111,7 @@ type UserUpdater interface {
 }
 
 type UserPartialUpdater interface {
-	PartialUpdate(domain.UserId, domain.UserPartialData) (*domain.User, error)
+	PartialUpdate(domain.UserId, *domain.UserPartialData) (*domain.User, error)
 }
 
 type UserDeleter interface {
@@ -181,10 +182,17 @@ func (s *userService) Update(id domain.UserId, req *UserUpdate) (*domain.User, e
 	return s.updater.Update(id, req.ToDomain())
 }
 
-func (s *userService) PartialUpdate(id domain.UserId, data domain.UserPartialData) (*domain.User, error) {
+func (s *userService) PartialUpdate(id domain.UserId, data *domain.UserPartialData) (*domain.User, error) {
 	return s.partialUpdater.PartialUpdate(id, data)
 }
 
 func (s *userService) Delete(id domain.UserId) error {
+	exists, err := s.observer.Exists(id)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrUserNotFound
+	}
 	return s.deleter.Delete(id)
 }

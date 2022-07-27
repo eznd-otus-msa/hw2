@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/jinzhu/configor"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	dblogger "gorm.io/gorm/logger"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/jinzhu/configor"
 
 	"github.com/eznd-otus-msa/hw2/app/internal/domain"
 	"github.com/eznd-otus-msa/hw2/app/internal/service"
@@ -19,7 +20,7 @@ import (
 
 func main() {
 	var cfg domain.Config
-	err := configor.Load(&cfg)
+	err := configor.Load(&cfg, "config/config.yaml", "./config.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -40,6 +41,7 @@ func main() {
 	postUserHandler := http.NewPostUser(userService)
 	putUserHandler := http.NewPutUser(userService)
 	patchUserHandler := http.NewPatchUser(userService)
+	deleteUserHandler := http.NewDeleteUser(userService)
 
 	srv := fiber.New(fiber.Config{})
 	srv.Use(logger.New())
@@ -57,6 +59,9 @@ func main() {
 
 	api.Patch("/user/:id", patchUserHandler.Handle())
 	api.Patch("/users/:id", patchUserHandler.Handle())
+
+	api.Delete("/user/:id", deleteUserHandler.Handle())
+	api.Delete("/users/:id", deleteUserHandler.Handle())
 
 	srv.All("/*", http.DefaultResponse)
 
