@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ezn-go/mixture"
 	"github.com/eznd-otus-msa/hw2/app/internal/transport/client/dbrepo"
+	dblogger "gorm.io/gorm/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,22 +17,16 @@ import (
 
 func main() {
 	var cfg domain.Config
-	err := configor.Load(&cfg, "config/config.yaml", "./config.yaml")
+	err := configor.New(&configor.Config{Silent: true}).Load(&cfg, "config/config.yaml", "./config.yaml")
 	if err != nil {
 		panic(err)
 	}
 
-	/*
-	   DB_HOST=localhost
-	   DB_NAME=postgres
-	   DB_PASSWORD=example
-	   DB_PORT=5432
-	   DB_USER=postgres
-	   DB_EXTRAS=sslmode=disable TimeZone=Europe/Moscow client_encoding=UTF8
-	*/
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: dbrepo.Dsn(cfg.Db),
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: dblogger.Default.LogMode(dblogger.Info),
+	})
 	if err != nil {
 		panic(err)
 	}

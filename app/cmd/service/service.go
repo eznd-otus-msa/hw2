@@ -20,7 +20,7 @@ import (
 
 func main() {
 	var cfg domain.Config
-	err := configor.Load(&cfg, "config/config.yaml", "./config.yaml")
+	err := configor.New(&configor.Config{Silent: true}).Load(&cfg, "config/config.yaml", "./config.yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +29,6 @@ func main() {
 		DSN: dbrepo.Dsn(cfg.Db),
 	}), &gorm.Config{
 		Logger: dblogger.Default.LogMode(dblogger.Info),
-		//Logger: dblogger.Default.LogMode(dblogger.Silent),
 	})
 	if err != nil {
 		panic(err)
@@ -62,6 +61,9 @@ func main() {
 
 	api.Delete("/user/:id", deleteUserHandler.Handle())
 	api.Delete("/users/:id", deleteUserHandler.Handle())
+
+	srv.Get("/probe/live", http.RespondOk)
+	srv.Get("/probe/ready", http.RespondOk)
 
 	srv.All("/*", http.DefaultResponse)
 
