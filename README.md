@@ -11,7 +11,11 @@
 Сделать простейший RESTful CRUD по созданию, удалению, просмотру и обновлению пользователей.
 Пример API - https://app.swaggerhub.com/apis/otus55/users/1.0.0
 ```
-Приложение реализовано, [app/](app)
+Приложение реализовано, [app/](app), апи полностью взят из примера выше
+
+Доступны 5 стандартных REST-методов: GET, POST, PUT, PATCH, DELETE
+
+Примеры работы с ними - в [коллекции](postman/collection.json)
 
 ```
 Конфигурация приложения должна хранится в Configmaps.
@@ -37,7 +41,7 @@
 ```
 Ingress-ы должны также вести на url arch.homework/ (как и в прошлом задании)
 ```
-[Ведут](helm/chart/templates/app_ingress.yaml)
+[Ведут](helm/chart/values.yaml#L14)
 
 ```
 На выходе должны быть предоставлены:
