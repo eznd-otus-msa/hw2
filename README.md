@@ -1,5 +1,5 @@
 # Курс OTUS Microservice architect
-## ДЗ №2 - «Основы работы с Kubernetes (часть 3)»
+## ДЗ №2 - «Основы работы с Kubernetes (часть 2)»
 
 ### TL;DR
 1. `make k8s-deploy`
