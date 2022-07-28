@@ -11,7 +11,7 @@
 Сделать простейший RESTful CRUD по созданию, удалению, просмотру и обновлению пользователей.
 Пример API - https://app.swaggerhub.com/apis/otus55/users/1.0.0
 ```
-Приложение реализовано, [app/](app), апи полностью взят из примера выше
+Приложение [реализовано](app), апи полностью взят из [примера](https://app.swaggerhub.com/apis/otus55/users/1.0.0) выше
 
 Доступны 5 стандартных REST-методов: GET, POST, PUT, PATCH, DELETE
 
@@ -20,7 +20,7 @@
 ```
 Конфигурация приложения должна хранится в Configmaps.
 ```
-
+[Хранятся](helm/chart/templates/app_configmap.yaml), за исключением пароля (см. ниже)
 
 ```
 Добавить базу данных для приложения.
@@ -31,12 +31,12 @@
 ```
 Доступы к БД должны храниться в Secrets.
 ```
-[app_secret.yaml](helm/chart/templates/app_secret.yaml)
+В [app_secret.yaml](helm/chart/templates/app_secret.yaml)
 
 ```
 Первоначальные миграции должны быть оформлены в качестве Job-ы, если это требуется.
 ```
-Не потребовалось, сделаны в виде initContaner в [деплойменте приложения](helm/chart/templates/app_deployment.yaml)
+Не потребовалось, сделаны в виде initContaner в [деплойменте](helm/chart/templates/app_deployment.yaml) приложения
 
 ```
 Ingress-ы должны также вести на url arch.homework/ (как и в прошлом задании)
