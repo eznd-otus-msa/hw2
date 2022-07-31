@@ -2,7 +2,7 @@ version: '3'
 services:
   app:
     container_name: app
-    image: eznd/otus-msa-hw2:v0.0.2
+    image: eznd/otus-msa-hw2:v0.0.13
     networks:
       - otus-msa-hw2
     restart: always
