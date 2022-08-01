@@ -187,12 +187,5 @@ func (s *userService) PartialUpdate(id domain.UserId, data *domain.UserPartialDa
 }
 
 func (s *userService) Delete(id domain.UserId) error {
-	exists, err := s.observer.Exists(id)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return domain.ErrUserNotFound
-	}
 	return s.deleter.Delete(id)
 }
